@@ -1,10 +1,20 @@
 import pygame
 import random
 import time
+import pygame.mixer
 
 pygame.init() 
+pygame.mixer.init()  # 음악 시스템 초기화
 
+# 음악 로딩 및 재생
+INITIAL_VOLUME = 0.1
+pygame.mixer.music.load("arcade-music.wav")  # 같은 폴더에 있는 파일
+pygame.mixer.music.play(-1)  # 무한 반복 재생
+pygame.mixer.music.set_volume(INITIAL_VOLUME)  # 0.0 ~ 1.0 볼륨조절
 
+# 효과음 로딩
+hit_sound = pygame.mixer.Sound("bounce-paddle.ogg")
+hit_sound.set_volume(0.2)  # 볼륨 조절 (0.0 ~ 1.0)
 
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
@@ -20,9 +30,46 @@ screen = pygame.display.set_mode((screen_width, screen_height))
 
 clock = pygame.time.Clock()
 
+# 시작 화면 출력
+def show_start_screen():
+    sound_on = True
+    icon_rect = pygame.Rect(screen_width - 50, screen_height - 50, 40, 40)
+
+    while True:
+        screen.fill(BLACK)
+
+        title = large_font.render('break out!', True, YELLOW)
+        instruction = small_font.render('click space bar', True, WHITE)
+        screen.blit(title, title.get_rect(centerx=screen_width // 2, centery=screen_height // 2 - 50))
+        screen.blit(instruction, instruction.get_rect(centerx=screen_width // 2, centery=screen_height // 2 + 20))
+
+        # 소리 아이콘
+        pygame.draw.rect(screen, GREEN if sound_on else RED, icon_rect)
+        icon_text = small_font.render('on' if sound_on else 'off', True, WHITE)
+        screen.blit(icon_text, icon_text.get_rect(center=icon_rect.center))
+
+        pygame.display.update()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    return sound_on  # 소리 상태를 runGame()에 전달
+
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if icon_rect.collidepoint(event.pos):
+                    sound_on = not sound_on
+                    pygame.mixer.music.set_volume(INITIAL_VOLUME if sound_on else 0.0)
+
 
 
 def runGame():
+    
+    sound_on = show_start_screen()
+    pygame.mixer.music.set_volume(INITIAL_VOLUME if sound_on else 0.0)
 
     Level = 1
 
@@ -128,6 +175,7 @@ def runGame():
 
         if ball.colliderect(paddle):
             ball_dy = -ball_dy                                                                          #공이 패들과 부딪히면 위로 반사
+            hit_sound.play()  # 🔊 패들과 충돌 시 효과음
             if ball.centerx <= paddle.left or ball.centerx > paddle.right:                              #만약 공이 패들의 가장자리에 닿았으면 X축 방향도 반사
                 ball_dx = ball_dx * -1 
 

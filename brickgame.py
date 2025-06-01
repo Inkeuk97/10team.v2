@@ -103,8 +103,10 @@ def runGamemk2():
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                return
+                return 
             if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    return
                 if event.key == pygame.K_p:
                     paused = not paused
                 if not paused:
@@ -120,6 +122,7 @@ def runGamemk2():
                     if event.key == pygame.K_d and dont[pygame.K_d]:
                         snake_dir = (TILE_SIZE, 0)
                         dont = {pygame.K_w: 1, pygame.K_s: 1, pygame.K_a: 0, pygame.K_d: 1}
+
         if paused:
             font = pygame.font.SysFont(None, 50)
             pause_text = font.render("Paused", True, 'white')

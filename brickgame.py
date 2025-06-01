@@ -50,8 +50,8 @@ def show_start_screen():
         pygame.draw.rect(screen, BLUE, block_button)
         pygame.draw.rect(screen, GREEN, snake_button)
 
-        block_text = small_font.render("Block Game", True, WHITE)
-        snake_text = small_font.render("Snake Game", True, WHITE)
+        block_text = small_font.render("Block break", True, WHITE)
+        snake_text = small_font.render("Block break.mk2", True, WHITE)
         screen.blit(block_text, block_text.get_rect(center=block_button.center))
         screen.blit(snake_text, snake_text.get_rect(center=snake_button.center))
 
@@ -77,10 +77,11 @@ def show_start_screen():
                 elif snake_button.collidepoint(event.pos):
                     return 'snake', sound_on
 
-def runSnakeGame():
+def runGamemk2():
     def get_random_position():
         return [random.randrange(*RANGE), random.randrange(*RANGE)]
 
+    paused = False
     WINDOW = 500
     TILE_SIZE = 20
     RANGE = (TILE_SIZE // 2, WINDOW - TILE_SIZE // 2, TILE_SIZE)
@@ -104,19 +105,30 @@ def runSnakeGame():
             if event.type == pygame.QUIT:
                 return
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_w and dont[pygame.K_w]:
-                    snake_dir = (0, -TILE_SIZE)
-                    dont = {pygame.K_w: 1, pygame.K_s: 0, pygame.K_a: 1, pygame.K_d: 1}
-                if event.key == pygame.K_s and dont[pygame.K_s]:
-                    snake_dir = (0, TILE_SIZE)
-                    dont = {pygame.K_w: 0, pygame.K_s: 1, pygame.K_a: 1, pygame.K_d: 1}
-                if event.key == pygame.K_a and dont[pygame.K_a]:
-                    snake_dir = (-TILE_SIZE, 0)
-                    dont = {pygame.K_w: 1, pygame.K_s: 1, pygame.K_a: 1, pygame.K_d: 0}
-                if event.key == pygame.K_d and dont[pygame.K_d]:
-                    snake_dir = (TILE_SIZE, 0)
-                    dont = {pygame.K_w: 1, pygame.K_s: 1, pygame.K_a: 0, pygame.K_d: 1}
+                if event.key == pygame.K_p:
+                    paused = not paused
+                if not paused:
+                    if event.key == pygame.K_w and dont[pygame.K_w]:
+                        snake_dir = (0, -TILE_SIZE)
+                        dont = {pygame.K_w: 1, pygame.K_s: 0, pygame.K_a: 1, pygame.K_d: 1}
+                    if event.key == pygame.K_s and dont[pygame.K_s]:
+                        snake_dir = (0, TILE_SIZE)
+                        dont = {pygame.K_w: 0, pygame.K_s: 1, pygame.K_a: 1, pygame.K_d: 1}
+                    if event.key == pygame.K_a and dont[pygame.K_a]:
+                        snake_dir = (-TILE_SIZE, 0)
+                        dont = {pygame.K_w: 1, pygame.K_s: 1, pygame.K_a: 1, pygame.K_d: 0}
+                    if event.key == pygame.K_d and dont[pygame.K_d]:
+                        snake_dir = (TILE_SIZE, 0)
+                        dont = {pygame.K_w: 1, pygame.K_s: 1, pygame.K_a: 0, pygame.K_d: 1}
+        if paused:
+            font = pygame.font.SysFont(None, 50)
+            pause_text = font.render("Paused", True, 'white')
+            screen.blit(pause_text, pause_text.get_rect(center=(WINDOW // 2, WINDOW // 2)))
+            pygame.display.flip()
+            clock.tick(15)
+            continue            
 
+    
         screen.fill('black')
         self_eating = pygame.Rect.collidelist(snake, tail[:-1]) != -1
 
@@ -327,7 +339,7 @@ def main():
     if selected_game == 'block':
         runGame()
     elif selected_game == 'snake':
-        runSnakeGame()
+        runGamemk2()
 
 main()
 pygame.quit()

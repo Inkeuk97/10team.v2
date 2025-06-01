@@ -216,14 +216,15 @@ def runGame():
 
         pygame.draw.rect(screen, BLUE, paddle)
 
-        score_image = small_font.render('Point {}'.format(score), True, YELLOW)
+        score_image = small_font.render('Score {}'.format(score), True, YELLOW)
         screen.blit(score_image, (10, 10))
 
         Life_image = small_font.render('Life {}'.format(Life), True, YELLOW)
         screen.blit(Life_image, Life_image.get_rect(right=screen_width - 10, top=10))
-
-        level_image = small_font.render('Level {}'.format(Level), True, YELLOW)
-        screen.blit(level_image, (10, 40))
+        
+        if Level <= 3:
+            level_image = small_font.render('Level {}'.format(Level), True, YELLOW)
+            screen.blit(level_image, (10, 40))
 
         if game_over == FAILURE:
             failure_image = large_font.render('Game Over', True, RED)

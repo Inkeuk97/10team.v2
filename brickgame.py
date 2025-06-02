@@ -52,6 +52,12 @@ def runGame():
     paddle = pygame.Rect(screen_width // 2 - 80 // 2, screen_height - 16, 100, 16)                          #패들 크기 : 80 * 16 / 화면 아래쪽에 위치 시킴
     paddle_dx = 0                                                                                           #패들 좌우 이동속도 (키 입력에 따라 변경)
 
+
+     # 폭탄 블록 관련
+    bomb_bricks = []
+    last_bomb_time = time.time()
+
+
     #메인루프 시작
     while True: 
         delta_time = clock.tick(60) / 10000                                                                       #FPS 60으로 설정 : 게임속도 고정
@@ -123,7 +129,37 @@ def runGame():
                     ball_dy = -ball_dy                                                                      #공 반사
                     score += 1                                                                              #점수 1점 증가
 
+       # 충돌은 1개만 감지되면 처리 끝# 폭탄 블록 충돌
+            for bomb in bomb_bricks[:]:
+                if ball.colliderect(bomb['rect']):
+                    ball_dy *= -1
+                    score += 1
+                    bomb_bricks.remove(bomb)
 
+                    # 중심 좌표
+                    cx, cy = bomb['col'], bomb['row']
+
+                    # 8방향 탐색
+                    for dx in [-1, 0, 1]:
+                        for dy in [-1, 0, 1]:
+                            if dx == 0 and dy == 0:
+                                continue
+
+                            target_col = cx + dx
+                            target_row = cy + dy
+
+                            # 일반 벽돌 제거
+                            for b in bricks[:]:
+                                if b['col'] == target_col and b['row'] == target_row:
+                                    bricks.remove(b)
+                                    score += 1
+
+                            # 폭탄 벽돌 제거 (스스로도 포함됨)
+                            for b in bomb_bricks[:]:
+                                if b['col'] == target_col and b['row'] == target_row:
+                                    bomb_bricks.remove(b)
+                                    score += 1
+                    break  # 충돌은 1개만 감지되면 처리 끝
         #공과 패들 충돌처리
 
         if ball.colliderect(paddle):
@@ -157,7 +193,12 @@ def runGame():
 
                 if Level > 3:
                     game_over = SUCCESS
-
+             # 폭탄 생성 (5초 주기)
+            if time.time() - last_bomb_time >= 5 and len(bricks) > 0:
+                target = random.choice(bricks)
+                bomb_bricks.append(target)
+                bricks.remove(target)
+                last_bomb_time = time.time()
 
         #화면 그리기
         for brick in bricks:

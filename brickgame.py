@@ -41,8 +41,8 @@ def show_start_screen():
 
     while True:
         screen.fill(BLACK)
-        title = large_font.render('Retro Game', True, YELLOW)
-        instruction = small_font.render('Choose Your Game', True, WHITE)
+        title = large_font.render('Classic Games', True, YELLOW)
+        instruction = small_font.render('Choose the Game', True, WHITE)
         screen.blit(title, title.get_rect(centerx=screen_width // 2, centery=screen_height // 2 - 80))
         screen.blit(instruction, instruction.get_rect(centerx=screen_width // 2, centery=screen_height // 2 - 30))
 
@@ -76,8 +76,11 @@ def show_start_screen():
                     return 'block', sound_on
                 elif snake_button.collidepoint(event.pos):
                     return 'snake', sound_on
+                
 
-def runGamemk2():
+    
+
+def runSnakeGame():
     def get_random_position():
         return [random.randrange(*RANGE), random.randrange(*RANGE)]
 
@@ -161,7 +164,7 @@ def runGamemk2():
         pygame.display.flip()
         clock.tick(60)
 
-def runGame():
+def runBrickGame():
     
     sound_on = show_start_screen()
     pygame.mixer.music.set_volume(INITIAL_VOLUME if sound_on else 0.0)
@@ -196,7 +199,7 @@ def runGame():
 
     #메인루프 시작
     while True: 
-        delta_time = clock.tick(60) / 10000                                                                       #FPS 60으로 설정 : 게임속도 고정
+        delta_time = clock.tick(60) / 10000                                                                 #FPS 60으로 설정 : 게임속도 고정
         screen.fill(BLACK)                                                                                  #이전 프레임의 내용을 지우고 새로 그림
 
     #이벤트 처리 (키 입력)
@@ -206,7 +209,11 @@ def runGame():
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:
                     paddle_dx = -5.0
+                elif event.key == pygame.K_a:
+                    paddle_dx = -5.0
                 elif event.key == pygame.K_RIGHT:
+                    paddle_dx = 5.0
+                elif event.key == pygame.K_d:
                     paddle_dx = 5.0
                 elif event.key == pygame.K_ESCAPE:
                     return
@@ -215,7 +222,11 @@ def runGame():
             elif event.type == pygame.KEYUP:
                 if event.key == pygame.K_LEFT:
                     paddle_dx = 0
+                elif event.key == pygame.K_a:
+                    paddle_dx = 0
                 elif event.key == pygame.K_RIGHT:
+                    paddle_dx = 0
+                elif event.key == pygame.K_d:
                     paddle_dx = 0
 
 
@@ -279,8 +290,8 @@ def runGame():
             if len(bricks) == 0:
                 Level += 1
                 Life += 1
-                ball_dx = float(ball_dx * 1.2) if ball_dx > 0 else float(ball_dx * 1.2)
-                ball_dy = float(ball_dy * 1.2) if ball_dy > 0 else float(ball_dy * 1.2)
+                ball_dx = float(ball_dx * 1.15) if ball_dx > 0 else float(ball_dx * 1.15)
+                ball_dy = float(ball_dy * 1.15) if ball_dy > 0 else float(ball_dy * 1.15)
 
                 bricks = []
                 COLUMN_COUNT = 8
@@ -340,9 +351,11 @@ def main():
     pygame.mixer.music.set_volume(INITIAL_VOLUME if sound_on else 0.0)
 
     if selected_game == 'block':
-        runGame()
+        runBrickGame()
     elif selected_game == 'snake':
-        runGamemk2()
+        runSnakeGame()
+
+
 
 main()
 pygame.quit()

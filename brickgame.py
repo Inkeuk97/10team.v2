@@ -51,9 +51,9 @@ def runGame():
 
     paddle = pygame.Rect(screen_width // 2 - 80 // 2, screen_height - 16, 100, 16)                          #패들 크기 : 80 * 16 / 화면 아래쪽에 위치 시킴
     paddle_dx = 0                                                                                           #패들 좌우 이동속도 (키 입력에 따라 변경)
+    paddle_dy = 0
 
-
-     # 폭탄 블록 관련
+    # 폭탄 블록 관련
     bomb_bricks = []
     last_bomb_time = time.time()
 
@@ -72,6 +72,10 @@ def runGame():
                     paddle_dx = -5.0
                 elif event.key == pygame.K_RIGHT:
                     paddle_dx = 5.0
+                elif event.key == pygame.K_UP:
+                    paddle_dy = -5.0  # 추가
+                elif event.key == pygame.K_DOWN:
+                    paddle_dy = 5.0   # 추가
                 elif event.key == pygame.K_ESCAPE:
                     return
                 elif event.key == pygame.K_p:
@@ -81,11 +85,16 @@ def runGame():
                     paddle_dx = 0
                 elif event.key == pygame.K_RIGHT:
                     paddle_dx = 0
+                elif event.key == pygame.K_UP:
+                    paddle_dy = 0   # 추가
+                elif event.key == pygame.K_DOWN:
+                    paddle_dy = 0   # 추가
 
 
         if not paused and game_over == 0:
         #객체 위치 업데이트
             paddle.left += paddle_dx
+            paddle.top += paddle_dy
 
             ball.left += ball_dx
             ball.top  += ball_dy
@@ -121,7 +130,10 @@ def runGame():
                 paddle.left = 0
             elif paddle.left > screen_width - paddle.width:
                 paddle.left = screen_width - paddle.width
-        
+            if paddle.top < 0:                         # 추가
+                paddle.top = 0
+            elif paddle.top > screen_height - paddle.height:  # 추가
+                paddle.top = screen_height - paddle.height
         #공과 벽돌 충돌 처리
             for brick in bricks:
                 if ball.colliderect(brick):

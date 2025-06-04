@@ -66,7 +66,9 @@ def show_start_screen():
                 pygame.quit()
                 exit()
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
+                if event.key == pygame.K_ESCAPE:
+                    return None  # 시작 화면에서 ESC 누르면 종료
+                elif event.key == pygame.K_SPACE:
                     return 'block', sound_on
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if icon_rect.collidepoint(event.pos):
@@ -347,13 +349,17 @@ def runBrickGame():
         pygame.display.update()
 
 def main():
-    selected_game, sound_on = show_start_screen()
-    pygame.mixer.music.set_volume(INITIAL_VOLUME if sound_on else 0.0)
+    while True:
+        result = show_start_screen()
+        if result is None:
+            break  # 게임 종료
+        selected_game, sound_on = result
+        pygame.mixer.music.set_volume(INITIAL_VOLUME if sound_on else 0.0)
 
-    if selected_game == 'block':
-        runBrickGame()
-    elif selected_game == 'snake':
-        runSnakeGame()
+        if selected_game == 'block':
+            runBrickGame()
+        elif selected_game == 'snake':
+            runSnakeGame()
 
 
 

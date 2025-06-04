@@ -360,6 +360,9 @@ def main():
             runBrickGame()
         elif selected_game == 'snake':
             runSnakeGame()
+        # 스네이크 게임 후 화면 크기 원래대로 복원
+            global screen
+            screen = pygame.display.set_mode((screen_width, screen_height))
 
 
 

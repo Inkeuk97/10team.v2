@@ -45,3 +45,13 @@
 22. Add background image
 
 23. Add restart function
+
+24. When the player quit one of the games,  not to exit the all process but go back to the menu
+
+25. If Fix No. 24 is operated, the background music is stopped, when come back to the menu
+
+26. Add the best score function
+
+27. Add the items in snake game like blue food can make the snake slow
+
+28. When player locate their mouse causer on the button, the button can be changed the color

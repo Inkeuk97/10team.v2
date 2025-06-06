@@ -55,3 +55,5 @@
 27. Add the items in snake game like blue food can make the snake slow
 
 28. When player locate their mouse causer on the button, the button can be changed the color
+
+29. Add setting menu

@@ -46,7 +46,7 @@
 
 23. Add restart function
 
-24. When the player quit one of the games,  not to exit the all process but go back to the menu
+24. When the player quit one of the games,  not to exit the all process but go back to the menu (Done)
 
 25. If Fix No. 24 is operated, the background music is stopped, when come back to the menu
 

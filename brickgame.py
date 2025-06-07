@@ -294,6 +294,11 @@ def runBrickGame():
                 Life += 1
                 ball_dx = float(ball_dx * 1.15) if ball_dx > 0 else float(ball_dx * 1.15)
                 ball_dy = float(ball_dy * 1.15) if ball_dy > 0 else float(ball_dy * 1.15)
+                
+                # 다음 레벨로 가기 전에 선택 화면
+                pygame.display.update()
+                if not show_level_cleared_screen(Level):
+                    return  # 사용자가 종료를 선택하면 게임 종료
 
                 bricks = []
                 COLUMN_COUNT = 8
@@ -347,6 +352,31 @@ def runBrickGame():
             screen.blit(pause_text, pause_text.get_rect(centerx=screen_width // 2, centery=screen_height // 2))
 
         pygame.display.update()
+
+def show_level_cleared_screen(level):
+    overlay = pygame.Surface((screen_width, screen_height))
+    overlay.set_alpha(180)
+    overlay.fill(BLACK)
+    screen.blit(overlay, (0, 0))
+
+    message = large_font.render(f"Level {level - 1} Cleared!", True, WHITE)
+    continue_text = small_font.render("Press C to Continue", True, GREEN)
+    quit_text = small_font.render("Press Q to Quit", True, RED)
+
+    screen.blit(message, message.get_rect(center=(screen_width // 2, screen_height // 2 - 60)))
+    screen.blit(continue_text, continue_text.get_rect(center=(screen_width // 2, screen_height // 2)))
+    screen.blit(quit_text, quit_text.get_rect(center=(screen_width // 2, screen_height // 2 + 50)))
+    pygame.display.flip()
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                return False
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_c:
+                    return True
+                elif event.key == pygame.K_q or event.key == pygame.K_ESCAPE:
+                    return False
 
 def main():
     while True:

@@ -30,6 +30,18 @@ screen = pygame.display.set_mode((screen_width, screen_height))
 
 clock = pygame.time.Clock()
 
+# 이미지 불러오기
+background_img = pygame.image.load("background.png")
+paddle_img = pygame.image.load("paddle.png")
+ball_img = pygame.image.load("ball.png")
+brick_img = pygame.image.load("brick.png")
+
+# 이미지 크기 조정
+paddle_img = pygame.transform.scale(paddle_img, (100, 20))
+ball_img = pygame.transform.scale(ball_img, (20, 20))
+brick_img = pygame.transform.scale(brick_img, (60, 30))
+background_img = pygame.transform.scale(background_img, (screen_width, screen_height))
+
 # 시작 화면 출력
 def show_start_screen():
     sound_on = True
@@ -187,7 +199,7 @@ def runBrickGame():
     COLUMN_COUNT = 8
     ROW_COUNT = 3               #8열 3행의 벽돌 생성
     for column_index in range(COLUMN_COUNT):
-        for row_index in range(ROW_COUNT):
+        for row_index in range(ROW_COUNT):  # 새 이미지에 맞게 크기를 변경해야 됨 나중에
             brick = pygame.Rect(column_index * (60 + 10) + 35, row_index * (16 + 5) + 80, 60, 16)           #벽돌의 크기 : 60 * 16 / 벽돌사이 간격 : 가로 10 세로 5 / 열간격 : (60 + 10) / 행간격 : (16 + 5) /  시작좌표 : (35, 35)
             bricks.append(brick)                                                                            #bricks 배열에 추가
 
@@ -316,13 +328,28 @@ def runBrickGame():
 
 
         #화면 그리기
-        for brick in bricks:
-            pygame.draw.rect(screen, GREEN, brick)
+        
+        # 배경 이미지 출력
+            screen.blit(background_img, (0, 0))
 
-        if game_over == 0:
-            pygame.draw.circle(screen, WHITE, (ball.centerx, ball.centery), ball.width // 2)
+            # 벽돌 그리기 (이미지)
+            for brick in bricks:
+                screen.blit(brick_img, (brick.left, brick.top))
 
-        pygame.draw.rect(screen, BLUE, paddle)
+            # 공 그리기 (이미지)
+            if game_over == 0:
+                screen.blit(ball_img, (ball.left, ball.top))
+
+            # 패들 그리기 (이미지)
+            screen.blit(paddle_img, (paddle.left, paddle.top))
+        
+        # for brick in bricks:
+        #     pygame.draw.rect(screen, GREEN, brick)
+
+        # if game_over == 0: # 게임 오버시 공이 존재하지만 보이지 않는 이유
+        #     pygame.draw.circle(screen, WHITE, (ball.centerx, ball.centery), ball.width // 2)
+
+        # pygame.draw.rect(screen, BLUE, paddle)
 
         score_image = small_font.render('Point {}'.format(score), True, YELLOW)
         screen.blit(score_image, (10, 10))

@@ -208,7 +208,7 @@ def runBrickGame():
     ball_dx = 5.0                                                                                             #ball_dx : 공 x축 속도
     ball_dy = -5.0                                                                                            #ball_dy : 공 y축 속도
 
-    paddle = pygame.Rect(screen_width // 2 - 80 // 2, screen_height - 16, 100, 16)                          #패들 크기 : 100 * 16 / 화면 아래쪽에 위치 시킴
+    paddle = pygame.Rect(screen_width // 2 - 80 // 2, screen_height - 16, 100, 20)                          #패들 크기 : 100 * 20 / 화면 아래쪽에 위치 시킴
     paddle_dx = 0                                                                                           #패들 좌우 이동속도 (키 입력에 따라 변경)
 
     #메인루프 시작

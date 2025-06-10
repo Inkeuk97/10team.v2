@@ -166,9 +166,8 @@ def runSnakeGame():
         pygame.display.flip()
         clock.tick(60)
 
-def runBrickGame():
+def runBrickGame(sound_on):
     
-    sound_on = show_start_screen()
     pygame.mixer.music.set_volume(INITIAL_VOLUME if sound_on else 0.0)
 
     Level = 1
@@ -387,7 +386,7 @@ def main():
         pygame.mixer.music.set_volume(INITIAL_VOLUME if sound_on else 0.0)
 
         if selected_game == 'block':
-            runBrickGame()
+            runBrickGame(sound_on)
         elif selected_game == 'snake':
             runSnakeGame()
         # 스네이크 게임 후 화면 크기 원래대로 복원

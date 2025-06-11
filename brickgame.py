@@ -90,18 +90,21 @@ def runSnakeGame():
     def init_snake(start_pos, start_dir):
         snake = pygame.Rect([0, 0, TILE_SIZE - 2, TILE_SIZE - 2])
         snake.center = start_pos
-        length = 3
-        # 시작할 때 몸통이 머리 뒤로 쭉 늘어지게 초기화
+        length = 5  # 뱀 길이 5
+
         tail = []
         for i in range(length):
             part = snake.copy()
-            part.move_ip(-start_dir[0] * i, -start_dir[1] * i)
+            # 방향이 TILE_SIZE 단위니까 i * TILE_SIZE 곱해줘야 정확함
+            part.move_ip(-start_dir[0] // abs(start_dir[0]) * TILE_SIZE * i if start_dir[0] != 0 else 0,
+                         -start_dir[1] // abs(start_dir[1]) * TILE_SIZE * i if start_dir[1] != 0 else 0)
             tail.append(part)
+
         dir = start_dir
         return {'head': tail[0], 'tail': tail, 'dir': dir, 'length': length, 'dead': False}
 
-    snake1 = init_snake((50, WINDOW // 2), (TILE_SIZE, 0))      # 오른쪽
-    snake2 = init_snake((WINDOW - 50, WINDOW // 2), (-TILE_SIZE, 0))  # 왼쪽
+    snake1 = init_snake((50, WINDOW // 2), (TILE_SIZE, 0))
+    snake2 = init_snake((WINDOW - 50, WINDOW // 2), (-TILE_SIZE, 0))
 
     screen = pygame.display.set_mode([WINDOW] * 2)
     clock = pygame.time.Clock()
@@ -120,42 +123,45 @@ def runSnakeGame():
                     return
                 if event.key == pygame.K_p:
                     paused = not paused
-                if not paused:
-                    # 뱀1 방향 전환
-                    if event.key == pygame.K_w and dont1[pygame.K_w]:
-                        snake1['dir'] = (0, -TILE_SIZE)
-                        dont1 = {pygame.K_w: 1, pygame.K_s: 0, pygame.K_a: 1, pygame.K_d: 1}
-                    if event.key == pygame.K_s and dont1[pygame.K_s]:
-                        snake1['dir'] = (0, TILE_SIZE)
-                        dont1 = {pygame.K_w: 0, pygame.K_s: 1, pygame.K_a: 1, pygame.K_d: 1}
-                    if event.key == pygame.K_a and dont1[pygame.K_a]:
-                        snake1['dir'] = (-TILE_SIZE, 0)
-                        dont1 = {pygame.K_w: 1, pygame.K_s: 1, pygame.K_a: 1, pygame.K_d: 0}
-                    if event.key == pygame.K_d and dont1[pygame.K_d]:
-                        snake1['dir'] = (TILE_SIZE, 0)
-                        dont1 = {pygame.K_w: 1, pygame.K_s: 1, pygame.K_a: 0, pygame.K_d: 1}
-
-                    # 뱀2 방향 전환
-                    if event.key == pygame.K_UP and dont2[pygame.K_UP]:
-                        snake2['dir'] = (0, -TILE_SIZE)
-                        dont2 = {pygame.K_UP: 1, pygame.K_DOWN: 0, pygame.K_LEFT: 1, pygame.K_RIGHT: 1}
-                    if event.key == pygame.K_DOWN and dont2[pygame.K_DOWN]:
-                        snake2['dir'] = (0, TILE_SIZE)
-                        dont2 = {pygame.K_UP: 0, pygame.K_DOWN: 1, pygame.K_LEFT: 1, pygame.K_RIGHT: 1}
-                    if event.key == pygame.K_LEFT and dont2[pygame.K_LEFT]:
-                        snake2['dir'] = (-TILE_SIZE, 0)
-                        dont2 = {pygame.K_UP: 1, pygame.K_DOWN: 1, pygame.K_LEFT: 1, pygame.K_RIGHT: 0}
-                    if event.key == pygame.K_RIGHT and dont2[pygame.K_RIGHT]:
-                        snake2['dir'] = (TILE_SIZE, 0)
-                        dont2 = {pygame.K_UP: 1, pygame.K_DOWN: 1, pygame.K_LEFT: 0, pygame.K_RIGHT: 1}
 
         if paused:
+            screen.fill('black')
             font = pygame.font.SysFont(None, 50)
             pause_text = font.render("Paused", True, 'white')
             screen.blit(pause_text, pause_text.get_rect(center=(WINDOW // 2, WINDOW // 2)))
             pygame.display.flip()
             clock.tick(15)
             continue
+
+        keys = pygame.key.get_pressed()
+
+        # 뱀1 방향 전환 (WASD)
+        if keys[pygame.K_w] and dont1[pygame.K_w]:
+            snake1['dir'] = (0, -TILE_SIZE)
+            dont1 = {pygame.K_w: 1, pygame.K_s: 0, pygame.K_a: 1, pygame.K_d: 1}
+        elif keys[pygame.K_s] and dont1[pygame.K_s]:
+            snake1['dir'] = (0, TILE_SIZE)
+            dont1 = {pygame.K_w: 0, pygame.K_s: 1, pygame.K_a: 1, pygame.K_d: 1}
+        elif keys[pygame.K_a] and dont1[pygame.K_a]:
+            snake1['dir'] = (-TILE_SIZE, 0)
+            dont1 = {pygame.K_w: 1, pygame.K_s: 1, pygame.K_a: 1, pygame.K_d: 0}
+        elif keys[pygame.K_d] and dont1[pygame.K_d]:
+            snake1['dir'] = (TILE_SIZE, 0)
+            dont1 = {pygame.K_w: 1, pygame.K_s: 1, pygame.K_a: 0, pygame.K_d: 1}
+
+        # 뱀2 방향 전환 (방향키)
+        if keys[pygame.K_UP] and dont2[pygame.K_UP]:
+            snake2['dir'] = (0, -TILE_SIZE)
+            dont2 = {pygame.K_UP: 1, pygame.K_DOWN: 0, pygame.K_LEFT: 1, pygame.K_RIGHT: 1}
+        elif keys[pygame.K_DOWN] and dont2[pygame.K_DOWN]:
+            snake2['dir'] = (0, TILE_SIZE)
+            dont2 = {pygame.K_UP: 0, pygame.K_DOWN: 1, pygame.K_LEFT: 1, pygame.K_RIGHT: 1}
+        elif keys[pygame.K_LEFT] and dont2[pygame.K_LEFT]:
+            snake2['dir'] = (-TILE_SIZE, 0)
+            dont2 = {pygame.K_UP: 1, pygame.K_DOWN: 1, pygame.K_LEFT: 1, pygame.K_RIGHT: 0}
+        elif keys[pygame.K_RIGHT] and dont2[pygame.K_RIGHT]:
+            snake2['dir'] = (TILE_SIZE, 0)
+            dont2 = {pygame.K_UP: 1, pygame.K_DOWN: 1, pygame.K_LEFT: 0, pygame.K_RIGHT: 1}
 
         screen.fill('black')
 
@@ -165,7 +171,6 @@ def runSnakeGame():
             next_head = snake['head'].copy()
             next_head.move_ip(snake['dir'])
 
-            # 벽 충돌 대신 반대편으로 넘어가기 처리
             if next_head.left < 0:
                 next_head.left = WINDOW - TILE_SIZE
             elif next_head.right > WINDOW:
@@ -187,18 +192,15 @@ def runSnakeGame():
         move_snake(snake1)
         move_snake(snake2)
 
-        # 머리끼리 충돌 검사 — 좌표가 같으면 둘 다 죽음
         if not snake1['dead'] and not snake2['dead']:
             if snake1['head'].center == snake2['head'].center:
                 snake1['dead'] = True
                 snake2['dead'] = True
 
-        # 뱀1이 뱀2 몸통에 부딪히면 죽음
         if not snake1['dead']:
             if snake1['head'].collidelist(snake2['tail']) != -1:
                 snake1['dead'] = True
 
-        # 뱀2가 뱀1 몸통에 부딪히면 죽음
         if not snake2['dead']:
             if snake2['head'].collidelist(snake1['tail']) != -1:
                 snake2['dead'] = True
@@ -209,7 +211,6 @@ def runSnakeGame():
             if snake['dead']:
                 font = pygame.font.SysFont(None, 40)
                 text = font.render("Dead", True, 'red')
-                # 머리 중심에 텍스트 그리기
                 text_rect = text.get_rect(center=snake['head'].center)
                 screen.blit(text, text_rect)
 

@@ -321,17 +321,18 @@ def runBrickGame(sound_on):
 
         #화면 그리기
         for brick in bricks:
-            pygame.draw.rect(screen, GREEN, brick)
+            pygame.draw.rect(screen, GREEN, brick, border_radius=2)
 
         if game_over == 0:
             pygame.draw.circle(screen, WHITE, (ball.centerx, ball.centery), ball.width // 2)
 
-        pygame.draw.rect(screen, BLUE, paddle)
+        pygame.draw.rect(screen, BLUE, paddle, border_radius=5)
+
 
         score_image = small_font.render('Point {}'.format(score), True, YELLOW)
         screen.blit(score_image, (10, 10))
 
-        Life_image = small_font.render('Life {}'.format(Life), True, YELLOW)
+        Life_image = small_font.render('Life {}'.format(Life), True, RED)
         screen.blit(Life_image, Life_image.get_rect(right=screen_width - 10, top=10))
 
         level_image = small_font.render('Level {}'.format(Level), True, YELLOW)

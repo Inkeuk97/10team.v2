@@ -83,23 +83,17 @@ def show_start_screen():
     
 
 def runSnakeGame():
-    def get_random_position():
-        return [random.randrange(*RANGE), random.randrange(*RANGE)]
-
     paused = False
     WINDOW = 500
     TILE_SIZE = 20
-    RANGE = (TILE_SIZE // 2, WINDOW - TILE_SIZE // 2, TILE_SIZE)
 
     snake = pygame.Rect([0, 0, TILE_SIZE - 2, TILE_SIZE - 2])
-    snake.center = get_random_position()
+    snake.center = [WINDOW // 2, WINDOW // 2]  # 중앙 시작
     length = 1
     tail = [snake.copy()]
     snake_dir = (0, 0)
 
     time, time_step = 0, 100
-    food = snake.copy()
-    food.center = get_random_position()
 
     screen = pygame.display.set_mode([WINDOW] * 2)
     clock = pygame.time.Clock()
@@ -108,7 +102,7 @@ def runSnakeGame():
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                return 
+                return
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     return
@@ -134,27 +128,25 @@ def runSnakeGame():
             screen.blit(pause_text, pause_text.get_rect(center=(WINDOW // 2, WINDOW // 2)))
             pygame.display.flip()
             clock.tick(15)
-            continue            
+            continue
 
-    
         screen.fill('black')
+
         self_eating = pygame.Rect.collidelist(snake, tail[:-1]) != -1
 
-        if snake.left < 0 or snake.right > WINDOW or snake.top < 0 or snake.bottom > WINDOW or self_eating:
-            snake.center, food.center = get_random_position(), get_random_position()
-            length, snake_dir = 1, (0, 0)
+        # 벽 충돌 시 초기화
+        if (snake.left < 0 or snake.right > WINDOW or
+            snake.top < 0 or snake.bottom > WINDOW or self_eating):
+            snake.center = [WINDOW // 2, WINDOW // 2]
+            length = 1
+            snake_dir = (0, 0)
             tail = [snake.copy()]
             dont = {pygame.K_w: 1, pygame.K_s: 1, pygame.K_a: 1, pygame.K_d: 1}
             time_step = 100
 
-        if snake.center == food.center:
-            food.center = get_random_position()
-            length += 1
-            if time_step > 40:
-                time_step -= 1
-
-        pygame.draw.rect(screen, 'yellow', food)
-        [pygame.draw.rect(screen, 'green', body) for body in tail]
+        pygame.draw.rect(screen, 'green', snake)
+        for body in tail:
+            pygame.draw.rect(screen, 'green', body)
 
         time_now = pygame.time.get_ticks()
         if time_now - time > time_step:
@@ -165,6 +157,7 @@ def runSnakeGame():
 
         pygame.display.flip()
         clock.tick(60)
+
 
 def runBrickGame(sound_on):
     

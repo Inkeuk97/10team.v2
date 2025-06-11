@@ -83,80 +83,135 @@ def show_start_screen():
     
 
 def runSnakeGame():
-    paused = False
+    pygame.init()
+
     WINDOW = 500
     TILE_SIZE = 20
+    RANGE = (TILE_SIZE // 2, WINDOW - TILE_SIZE // 2, TILE_SIZE)
 
-    snake = pygame.Rect([0, 0, TILE_SIZE - 2, TILE_SIZE - 2])
-    snake.center = [WINDOW // 2, WINDOW // 2]  # 중앙 시작
-    length = 1
-    tail = [snake.copy()]
-    snake_dir = (0, 0)
+    def get_random_position():
+        return [random.randrange(*RANGE), random.randrange(*RANGE)]
 
-    time, time_step = 0, 100
+    def init_snake(color, start_dir):
+        rect = pygame.Rect(0, 0, TILE_SIZE - 2, TILE_SIZE - 2)
+        rect.center = get_random_position()
+        dir_x, dir_y = start_dir
+        tail = [rect.copy()]
+        for i in range(1, 3):  # 2칸 더 생성 (총 3칸)
+            body = rect.copy()
+            body.move_ip(-dir_x * i, -dir_y * i)
+            tail.insert(0, body)
+        return {
+            'head': rect,
+            'dir': start_dir,
+            'tail': tail,
+            'length': 3,
+            'color': color,
+            'alive': True,
+            'dont': {k: 1 for k in [pygame.K_w, pygame.K_s, pygame.K_a, pygame.K_d,
+                                    pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT]},
+        }
 
     screen = pygame.display.set_mode([WINDOW] * 2)
     clock = pygame.time.Clock()
-    dont = {pygame.K_w: 1, pygame.K_s: 1, pygame.K_a: 1, pygame.K_d: 1}
+    font = pygame.font.SysFont(None, 50)
+
+    snake1 = init_snake('green', (TILE_SIZE, 0))  # 오른쪽 방향 시작
+    snake2 = init_snake('blue', (-TILE_SIZE, 0))  # 왼쪽 방향 시작
+
+    food = pygame.Rect(0, 0, TILE_SIZE - 2, TILE_SIZE - 2)
+    food.center = get_random_position()
+
+    time, time_step = 0, 100
 
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                return
+                pygame.quit()
+                sys.exit()
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    return
-                if event.key == pygame.K_p:
-                    paused = not paused
-                if not paused:
-                    if event.key == pygame.K_w and dont[pygame.K_w]:
-                        snake_dir = (0, -TILE_SIZE)
-                        dont = {pygame.K_w: 1, pygame.K_s: 0, pygame.K_a: 1, pygame.K_d: 1}
-                    if event.key == pygame.K_s and dont[pygame.K_s]:
-                        snake_dir = (0, TILE_SIZE)
-                        dont = {pygame.K_w: 0, pygame.K_s: 1, pygame.K_a: 1, pygame.K_d: 1}
-                    if event.key == pygame.K_a and dont[pygame.K_a]:
-                        snake_dir = (-TILE_SIZE, 0)
-                        dont = {pygame.K_w: 1, pygame.K_s: 1, pygame.K_a: 1, pygame.K_d: 0}
-                    if event.key == pygame.K_d and dont[pygame.K_d]:
-                        snake_dir = (TILE_SIZE, 0)
-                        dont = {pygame.K_w: 1, pygame.K_s: 1, pygame.K_a: 0, pygame.K_d: 1}
+                # Player 1 - WASD
+                if snake1['alive']:
+                    if event.key == pygame.K_w and snake1['dont'][pygame.K_w]:
+                        snake1['dir'] = (0, -TILE_SIZE)
+                        snake1['dont'] = {pygame.K_w: 1, pygame.K_s: 0, pygame.K_a: 1, pygame.K_d: 1}
+                    elif event.key == pygame.K_s and snake1['dont'][pygame.K_s]:
+                        snake1['dir'] = (0, TILE_SIZE)
+                        snake1['dont'] = {pygame.K_w: 0, pygame.K_s: 1, pygame.K_a: 1, pygame.K_d: 1}
+                    elif event.key == pygame.K_a and snake1['dont'][pygame.K_a]:
+                        snake1['dir'] = (-TILE_SIZE, 0)
+                        snake1['dont'] = {pygame.K_w: 1, pygame.K_s: 1, pygame.K_a: 1, pygame.K_d: 0}
+                    elif event.key == pygame.K_d and snake1['dont'][pygame.K_d]:
+                        snake1['dir'] = (TILE_SIZE, 0)
+                        snake1['dont'] = {pygame.K_w: 1, pygame.K_s: 1, pygame.K_a: 0, pygame.K_d: 1}
 
-        if paused:
-            font = pygame.font.SysFont(None, 50)
-            pause_text = font.render("Paused", True, 'white')
-            screen.blit(pause_text, pause_text.get_rect(center=(WINDOW // 2, WINDOW // 2)))
-            pygame.display.flip()
-            clock.tick(15)
-            continue
+                # Player 2 - Arrow Keys
+                if snake2['alive']:
+                    if event.key == pygame.K_UP and snake2['dont'][pygame.K_UP]:
+                        snake2['dir'] = (0, -TILE_SIZE)
+                        snake2['dont'] = {pygame.K_UP: 1, pygame.K_DOWN: 0, pygame.K_LEFT: 1, pygame.K_RIGHT: 1}
+                    elif event.key == pygame.K_DOWN and snake2['dont'][pygame.K_DOWN]:
+                        snake2['dir'] = (0, TILE_SIZE)
+                        snake2['dont'] = {pygame.K_UP: 0, pygame.K_DOWN: 1, pygame.K_LEFT: 1, pygame.K_RIGHT: 1}
+                    elif event.key == pygame.K_LEFT and snake2['dont'][pygame.K_LEFT]:
+                        snake2['dir'] = (-TILE_SIZE, 0)
+                        snake2['dont'] = {pygame.K_UP: 1, pygame.K_DOWN: 1, pygame.K_LEFT: 1, pygame.K_RIGHT: 0}
+                    elif event.key == pygame.K_RIGHT and snake2['dont'][pygame.K_RIGHT]:
+                        snake2['dir'] = (TILE_SIZE, 0)
+                        snake2['dont'] = {pygame.K_UP: 1, pygame.K_DOWN: 1, pygame.K_LEFT: 0, pygame.K_RIGHT: 1}
 
         screen.fill('black')
 
-        self_eating = pygame.Rect.collidelist(snake, tail[:-1]) != -1
-
-        # 벽 충돌 시 초기화
-        if (snake.left < 0 or snake.right > WINDOW or
-            snake.top < 0 or snake.bottom > WINDOW or self_eating):
-            snake.center = [WINDOW // 2, WINDOW // 2]
-            length = 1
-            snake_dir = (0, 0)
-            tail = [snake.copy()]
-            dont = {pygame.K_w: 1, pygame.K_s: 1, pygame.K_a: 1, pygame.K_d: 1}
-            time_step = 100
-
-        pygame.draw.rect(screen, 'green', snake)
-        for body in tail:
-            pygame.draw.rect(screen, 'green', body)
+        for snake in [snake1, snake2]:
+            if snake['head'].center == food.center:
+                food.center = get_random_position()
+                snake['length'] += 1
+                if time_step > 40:
+                    time_step -= 1
 
         time_now = pygame.time.get_ticks()
         if time_now - time > time_step:
             time = time_now
-            snake.move_ip(snake_dir)
-            tail.append(snake.copy())
-            tail = tail[-length:]
+            for snake in [snake1, snake2]:
+                if not snake['alive']:
+                    continue
+
+                next_pos = snake['head'].copy()
+                next_pos.move_ip(snake['dir'])
+
+                # 벽에 닿으면 멈춤
+                if not (0 <= next_pos.left < WINDOW and 0 <= next_pos.right <= WINDOW and
+                        0 <= next_pos.top < WINDOW and 0 <= next_pos.bottom <= WINDOW):
+                    snake['dir'] = (0, 0)
+                    continue
+
+                snake['head'].move_ip(snake['dir'])
+                snake['tail'].append(snake['head'].copy())
+                snake['tail'] = snake['tail'][-snake['length']:]
+
+        # 충돌 판정 (자기 몸, 상대 몸)
+        if snake1['alive']:
+            if snake1['head'].collidelist(snake1['tail'][:-1]) != -1 or \
+                    snake1['head'].collidelist(snake2['tail']) != -1:
+                snake1['alive'] = False
+
+        if snake2['alive']:
+            if snake2['head'].collidelist(snake2['tail'][:-1]) != -1 or \
+                    snake2['head'].collidelist(snake1['tail']) != -1:
+                snake2['alive'] = False
+
+        pygame.draw.rect(screen, 'yellow', food)
+
+        for snake in [snake1, snake2]:
+            for body in snake['tail']:
+                pygame.draw.rect(screen, snake['color'], body)
+            if not snake['alive']:
+                text = font.render("Dead", True, 'white')
+                screen.blit(text, text.get_rect(center=snake['head'].center))
 
         pygame.display.flip()
         clock.tick(60)
+
 
 
 def runBrickGame(sound_on):

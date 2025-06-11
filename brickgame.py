@@ -36,8 +36,8 @@ def show_start_screen():
     icon_rect = pygame.Rect(screen_width - 50, screen_height - 50, 40, 40) #아이콘 위치
 
     # 게임 선택 버튼
-    block_button = pygame.Rect(screen_width // 2 - 100, screen_height // 2 + 80, 200, 50)
-    snake_button = pygame.Rect(screen_width // 2 - 100, screen_height // 2 + 150, 200, 50)
+    block_button = pygame.Rect(screen_width // 2 - 130, screen_height // 2 + 80, 250, 50)
+    snake_button = pygame.Rect(screen_width // 2 - 130, screen_height // 2 + 150, 250, 50)
 
     while True:
         screen.fill(BLACK)
@@ -51,7 +51,7 @@ def show_start_screen():
         pygame.draw.rect(screen, GREEN, snake_button)
 
         block_text = small_font.render("Block break", True, WHITE)
-        snake_text = small_font.render("Block break.mk2", True, WHITE)
+        snake_text = small_font.render("Block break. Snake", True, WHITE)
         screen.blit(block_text, block_text.get_rect(center=block_button.center))
         screen.blit(snake_text, snake_text.get_rect(center=snake_button.center))
 
@@ -82,6 +82,10 @@ def show_start_screen():
 
     
 
+
+
+
+
 def runSnakeGame():
     pygame.init()
     WINDOW = 500
@@ -90,52 +94,68 @@ def runSnakeGame():
     def init_snake(start_pos, start_dir):
         snake = pygame.Rect([0, 0, TILE_SIZE - 2, TILE_SIZE - 2])
         snake.center = start_pos
-        length = 5  # 뱀 길이 5
-
+        length = 5
         tail = []
         for i in range(length):
             part = snake.copy()
-            # 방향이 TILE_SIZE 단위니까 i * TILE_SIZE 곱해줘야 정확함
-            part.move_ip(-start_dir[0] // abs(start_dir[0]) * TILE_SIZE * i if start_dir[0] != 0 else 0,
-                         -start_dir[1] // abs(start_dir[1]) * TILE_SIZE * i if start_dir[1] != 0 else 0)
+            part.move_ip(
+                -start_dir[0] // abs(start_dir[0]) * TILE_SIZE * i if start_dir[0] != 0 else 0,
+                -start_dir[1] // abs(start_dir[1]) * TILE_SIZE * i if start_dir[1] != 0 else 0
+            )
             tail.append(part)
-
-        dir = start_dir
-        return {'head': tail[0], 'tail': tail, 'dir': dir, 'length': length, 'dead': False}
-
-    snake1 = init_snake((50, WINDOW // 2), (TILE_SIZE, 0))
-    snake2 = init_snake((WINDOW - 50, WINDOW // 2), (-TILE_SIZE, 0))
+        return {'head': tail[0], 'tail': tail, 'dir': start_dir, 'length': length, 'dead': False}
 
     screen = pygame.display.set_mode([WINDOW] * 2)
     clock = pygame.time.Clock()
-
     paused = False
 
-    dont1 = {pygame.K_w: 1, pygame.K_s: 1, pygame.K_a: 1, pygame.K_d: 1}
-    dont2 = {pygame.K_UP: 1, pygame.K_DOWN: 1, pygame.K_LEFT: 1, pygame.K_RIGHT: 1}
+    score1 = 0
+    score2 = 0
+    WIN_SCORE = 3
+
+    def reset_game():
+        snake1 = init_snake((TILE_SIZE * 2, TILE_SIZE * 2), (TILE_SIZE, 0))
+        snake2 = init_snake((WINDOW - TILE_SIZE * 2, WINDOW - TILE_SIZE * 2), (-TILE_SIZE, 0))
+        dont1 = {pygame.K_w: 1, pygame.K_s: 1, pygame.K_a: 1, pygame.K_d: 1}
+        dont2 = {pygame.K_UP: 1, pygame.K_DOWN: 1, pygame.K_LEFT: 1, pygame.K_RIGHT: 1}
+        return snake1, snake2, dont1, dont2
+
+    def draw_text_center(text, size, color):
+        font = pygame.font.SysFont(None, size)
+        render = font.render(text, True, color)
+        rect = render.get_rect(center=(WINDOW // 2, WINDOW // 2))
+        screen.blit(render, rect)
+
+    def draw_scores(score1, score2):
+        font = pygame.font.SysFont(None, 30)
+        text1 = font.render(f"Green: {score1}", True, 'green')
+        text2 = font.render(f"Blue: {score2}", True, 'blue')
+        screen.blit(text1, (10, 10))
+        screen.blit(text2, (WINDOW - text2.get_width() - 10, 10))
+
+    snake1, snake2, dont1, dont2 = reset_game()
 
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                pygame.quit()
                 return
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
+                    pygame.quit()
                     return
                 if event.key == pygame.K_p:
                     paused = not paused
 
         if paused:
             screen.fill('black')
-            font = pygame.font.SysFont(None, 50)
-            pause_text = font.render("Paused", True, 'white')
-            screen.blit(pause_text, pause_text.get_rect(center=(WINDOW // 2, WINDOW // 2)))
+            draw_text_center("Paused", 50, 'white')
             pygame.display.flip()
             clock.tick(15)
             continue
 
         keys = pygame.key.get_pressed()
-
-        # 뱀1 방향 전환 (WASD)
+        # 방향 입력 처리
         if keys[pygame.K_w] and dont1[pygame.K_w]:
             snake1['dir'] = (0, -TILE_SIZE)
             dont1 = {pygame.K_w: 1, pygame.K_s: 0, pygame.K_a: 1, pygame.K_d: 1}
@@ -149,7 +169,6 @@ def runSnakeGame():
             snake1['dir'] = (TILE_SIZE, 0)
             dont1 = {pygame.K_w: 1, pygame.K_s: 1, pygame.K_a: 0, pygame.K_d: 1}
 
-        # 뱀2 방향 전환 (방향키)
         if keys[pygame.K_UP] and dont2[pygame.K_UP]:
             snake2['dir'] = (0, -TILE_SIZE)
             dont2 = {pygame.K_UP: 1, pygame.K_DOWN: 0, pygame.K_LEFT: 1, pygame.K_RIGHT: 1}
@@ -200,7 +219,6 @@ def runSnakeGame():
         if not snake1['dead']:
             if snake1['head'].collidelist(snake2['tail']) != -1:
                 snake1['dead'] = True
-
         if not snake2['dead']:
             if snake2['head'].collidelist(snake1['tail']) != -1:
                 snake2['dead'] = True
@@ -211,14 +229,49 @@ def runSnakeGame():
             if snake['dead']:
                 font = pygame.font.SysFont(None, 40)
                 text = font.render("Dead", True, 'red')
-                text_rect = text.get_rect(center=snake['head'].center)
-                screen.blit(text, text_rect)
+                screen.blit(text, text.get_rect(center=snake['head'].center))
 
         draw_snake(snake1, 'green')
         draw_snake(snake2, 'blue')
+        draw_scores(score1, score2)
 
         pygame.display.flip()
         clock.tick(15)
+
+        if snake1['dead'] or snake2['dead']:
+            winner_text = "Draw!"
+            if snake1['dead'] and not snake2['dead']:
+                winner_text = "Blue Wins!"
+                score2 += 1
+            elif snake2['dead'] and not snake1['dead']:
+                winner_text = "Green Wins!"
+                score1 += 1
+
+            screen.fill('black')
+            draw_text_center(winner_text, 50, 'yellow')
+            pygame.display.flip()
+            pygame.time.wait(2000)
+
+            if score1 >= WIN_SCORE:
+                screen.fill('black')
+                draw_text_center("Green Wins the Game!", 60, 'green')
+                pygame.display.flip()
+                pygame.time.wait(3000)
+                # 최종 승자 화면 후 메뉴 복귀를 위해 함수 종료
+                return
+            elif score2 >= WIN_SCORE:
+                screen.fill('black')
+                draw_text_center("Blue Wins the Game!", 60, 'blue')
+                pygame.display.flip()
+                pygame.time.wait(3000)
+                # 최종 승자 화면 후 메뉴 복귀를 위해 함수 종료
+                return
+
+            # 게임 리셋 후 다시 시작
+            snake1, snake2, dont1, dont2 = reset_game()
+
+
+
 
 
 

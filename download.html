@@ -4,7 +4,67 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>file download</title>
-  <link rel="stylesheet" href="styles.css">
+  <style>
+    body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Verdana', 'Segoe UI', sans-serif;
+  background-color: #121212;
+  color: #ffffff;
+  text-align: center;
+}
+
+.container {
+  max-width: 700px;
+  margin: 80px auto;
+  padding: 40px;
+  background-color: #1e1e1e;
+  border: 2px solid #00ff00;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
+}
+
+h1 {
+  font-size: 26px;
+  color: #00ff00;
+  margin-bottom: 20px;
+  border-bottom: 2px dashed #00ff00;
+  padding-bottom: 10px;
+}
+
+p {
+  font-size: 16px;
+  color: #dddddd;
+  margin-bottom: 30px;
+}
+
+.file-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  align-items: center;
+}
+
+/* 버튼 스타일 */
+.download-btn {
+  display: inline-block;
+  background-color: #00ff00;
+  color: #000;
+  font-weight: bold;
+  text-decoration: none;
+  padding: 14px 24px;
+  border-radius: 4px;
+  transition: 0.2s ease-in-out;
+  border: 2px solid #00cc00;
+  box-shadow: 2px 2px 0 #006600;
+}
+
+.download-btn:hover {
+  background-color: #66ff66;
+  box-shadow: 2px 2px 8px #00ff00;
+  transform: translateY(-2px);
+}
+  </style>
 </head>
 <body>
   <div class="container">

@@ -424,7 +424,6 @@ def runSnakeGame2():
                 return
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    pygame.quit()
                     return
                 if event.key == pygame.K_p:
                     paused = not paused

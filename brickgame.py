@@ -82,7 +82,7 @@ def show_start_screen():
                     return 'block', sound_on
                 elif snake_button1.collidepoint(event.pos):
                     return 'snake1', sound_on
-                elif snake_button1.collidepoint(event.pos):
+                elif snake_button2.collidepoint(event.pos):
                     return 'snake2', sound_on
                 
 def runBrickGame(sound_on):
@@ -358,6 +358,189 @@ def runSnakeGame1():
         clock.tick(60)
 
 
+def runSnakeGame2():
+    pygame.init()
+    WINDOW = 500
+    TILE_SIZE = 20
+
+    def init_snake(start_pos, start_dir):
+        snake = pygame.Rect([0, 0, TILE_SIZE - 2, TILE_SIZE - 2])
+        snake.center = start_pos
+        length = 5
+        tail = []
+        for i in range(length):
+            part = snake.copy()
+            part.move_ip(
+                -start_dir[0] // abs(start_dir[0]) * TILE_SIZE * i if start_dir[0] != 0 else 0,
+                -start_dir[1] // abs(start_dir[1]) * TILE_SIZE * i if start_dir[1] != 0 else 0
+            )
+            tail.append(part)
+        return {'head': tail[0], 'tail': tail, 'dir': start_dir, 'length': length, 'dead': False}
+
+    screen = pygame.display.set_mode([WINDOW] * 2)
+    clock = pygame.time.Clock()
+    paused = False
+
+    score1 = 0
+    score2 = 0
+    WIN_SCORE = 3
+
+    def reset_game():
+        snake1 = init_snake((TILE_SIZE * 2, TILE_SIZE * 2), (TILE_SIZE, 0))
+        snake2 = init_snake((WINDOW - TILE_SIZE * 2, WINDOW - TILE_SIZE * 2), (-TILE_SIZE, 0))
+        dont1 = {pygame.K_w: 1, pygame.K_s: 1, pygame.K_a: 1, pygame.K_d: 1}
+        dont2 = {pygame.K_UP: 1, pygame.K_DOWN: 1, pygame.K_LEFT: 1, pygame.K_RIGHT: 1}
+        return snake1, snake2, dont1, dont2
+
+    def draw_text_center(text, size, color):
+        font = pygame.font.SysFont(None, size)
+        render = font.render(text, True, color)
+        rect = render.get_rect(center=(WINDOW // 2, WINDOW // 2))
+        screen.blit(render, rect)
+
+    def draw_scores(score1, score2):
+        font = pygame.font.SysFont(None, 30)
+        text1 = font.render(f"Green: {score1}", True, 'green')
+        text2 = font.render(f"Blue: {score2}", True, 'blue')
+        screen.blit(text1, (10, 10))
+        screen.blit(text2, (WINDOW - text2.get_width() - 10, 10))
+
+    snake1, snake2, dont1, dont2 = reset_game()
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                return
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    pygame.quit()
+                    return
+                if event.key == pygame.K_p:
+                    paused = not paused
+
+        if paused:
+            screen.fill('black')
+            draw_text_center("Paused", 50, 'white')
+            pygame.display.flip()
+            clock.tick(15)
+            continue
+
+        keys = pygame.key.get_pressed()
+        # 방향 입력 처리
+        if keys[pygame.K_w] and dont1[pygame.K_w]:
+            snake1['dir'] = (0, -TILE_SIZE)
+            dont1 = {pygame.K_w: 1, pygame.K_s: 0, pygame.K_a: 1, pygame.K_d: 1}
+        elif keys[pygame.K_s] and dont1[pygame.K_s]:
+            snake1['dir'] = (0, TILE_SIZE)
+            dont1 = {pygame.K_w: 0, pygame.K_s: 1, pygame.K_a: 1, pygame.K_d: 1}
+        elif keys[pygame.K_a] and dont1[pygame.K_a]:
+            snake1['dir'] = (-TILE_SIZE, 0)
+            dont1 = {pygame.K_w: 1, pygame.K_s: 1, pygame.K_a: 1, pygame.K_d: 0}
+        elif keys[pygame.K_d] and dont1[pygame.K_d]:
+            snake1['dir'] = (TILE_SIZE, 0)
+            dont1 = {pygame.K_w: 1, pygame.K_s: 1, pygame.K_a: 0, pygame.K_d: 1}
+
+        if keys[pygame.K_UP] and dont2[pygame.K_UP]:
+            snake2['dir'] = (0, -TILE_SIZE)
+            dont2 = {pygame.K_UP: 1, pygame.K_DOWN: 0, pygame.K_LEFT: 1, pygame.K_RIGHT: 1}
+        elif keys[pygame.K_DOWN] and dont2[pygame.K_DOWN]:
+            snake2['dir'] = (0, TILE_SIZE)
+            dont2 = {pygame.K_UP: 0, pygame.K_DOWN: 1, pygame.K_LEFT: 1, pygame.K_RIGHT: 1}
+        elif keys[pygame.K_LEFT] and dont2[pygame.K_LEFT]:
+            snake2['dir'] = (-TILE_SIZE, 0)
+            dont2 = {pygame.K_UP: 1, pygame.K_DOWN: 1, pygame.K_LEFT: 1, pygame.K_RIGHT: 0}
+        elif keys[pygame.K_RIGHT] and dont2[pygame.K_RIGHT]:
+            snake2['dir'] = (TILE_SIZE, 0)
+            dont2 = {pygame.K_UP: 1, pygame.K_DOWN: 1, pygame.K_LEFT: 0, pygame.K_RIGHT: 1}
+
+        screen.fill('black')
+
+        def move_snake(snake):
+            if snake['dead']:
+                return
+            next_head = snake['head'].copy()
+            next_head.move_ip(snake['dir'])
+
+            if next_head.left < 0:
+                next_head.left = WINDOW - TILE_SIZE
+            elif next_head.right > WINDOW:
+                next_head.right = 0
+            if next_head.top < 0:
+                next_head.top = WINDOW - TILE_SIZE
+            elif next_head.bottom > WINDOW:
+                next_head.bottom = 0
+
+            if next_head.collidelist(snake['tail']) != -1:
+                snake['dead'] = True
+                return
+
+            snake['head'] = next_head
+            snake['tail'].append(next_head.copy())
+            if len(snake['tail']) > snake['length']:
+                snake['tail'].pop(0)
+
+        move_snake(snake1)
+        move_snake(snake2)
+
+        if not snake1['dead'] and not snake2['dead']:
+            if snake1['head'].center == snake2['head'].center:
+                snake1['dead'] = True
+                snake2['dead'] = True
+
+        if not snake1['dead']:
+            if snake1['head'].collidelist(snake2['tail']) != -1:
+                snake1['dead'] = True
+        if not snake2['dead']:
+            if snake2['head'].collidelist(snake1['tail']) != -1:
+                snake2['dead'] = True
+
+        def draw_snake(snake, color):
+            for part in snake['tail']:
+                pygame.draw.rect(screen, color, part)
+            if snake['dead']:
+                font = pygame.font.SysFont(None, 40)
+                text = font.render("Dead", True, 'red')
+                screen.blit(text, text.get_rect(center=snake['head'].center))
+
+        draw_snake(snake1, 'green')
+        draw_snake(snake2, 'blue')
+        draw_scores(score1, score2)
+
+        pygame.display.flip()
+        clock.tick(15)
+
+        if snake1['dead'] or snake2['dead']:
+            winner_text = "Draw!"
+            if snake1['dead'] and not snake2['dead']:
+                winner_text = "Blue Wins!"
+                score2 += 1
+            elif snake2['dead'] and not snake1['dead']:
+                winner_text = "Green Wins!"
+                score1 += 1
+
+            screen.fill('black')
+            draw_text_center(winner_text, 50, 'yellow')
+            pygame.display.flip()
+            pygame.time.wait(2000)
+
+            if score1 >= WIN_SCORE:
+                screen.fill('black')
+                draw_text_center("Green Wins the Game!", 60, 'green')
+                pygame.display.flip()
+                pygame.time.wait(3000)
+                # 최종 승자 화면 후 메뉴 복귀를 위해 함수 종료
+                return
+            elif score2 >= WIN_SCORE:
+                screen.fill('black')
+                draw_text_center("Blue Wins the Game!", 60, 'blue')
+                pygame.display.flip()
+                pygame.time.wait(3000)
+                # 최종 승자 화면 후 메뉴 복귀를 위해 함수 종료
+                return
+
+            # 게임 리셋 후 다시 시작
+            snake1, snake2, dont1, dont2 = reset_game()
 
 def show_level_cleared_screen(level):
     overlay = pygame.Surface((screen_width, screen_height))
@@ -385,6 +568,7 @@ def show_level_cleared_screen(level):
                     return False
 
 def main():
+    global screen
     while True:
         result = show_start_screen()
         if result is None:
@@ -395,9 +579,15 @@ def main():
         if selected_game == 'block':
             runBrickGame(sound_on)
         elif selected_game == 'snake1':
+            
             runSnakeGame1()
         # 스네이크 게임 후 화면 크기 원래대로 복원
-            global screen
+            
+            screen = pygame.display.set_mode((screen_width, screen_height))
+        elif selected_game == 'snake2':
+            
+            runSnakeGame2()
+            
             screen = pygame.display.set_mode((screen_width, screen_height))
 
 

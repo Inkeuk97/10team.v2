@@ -50,7 +50,7 @@ def show_start_screen():
         # 버튼 그리기
         pygame.draw.rect(screen, BLUE, block_button)
         pygame.draw.rect(screen, GREEN, snake_button1)
-        pygame.draw.rect(screen, GREEN, snake_button2)
+        pygame.draw.rect(screen, (255, 165, 0), snake_button2)
 
         block_text = small_font.render("Brick break", True, WHITE)
         snake_text1 = small_font.render("Snake game - 1 player", True, WHITE)

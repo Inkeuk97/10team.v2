@@ -125,8 +125,8 @@ def runSnakeGame():
     WIN_SCORE = 3
 
     def reset_game():
-        snake1 = init_snake((TILE_SIZE * 2, TILE_SIZE * 2), (TILE_SIZE, 0))
-        snake2 = init_snake((WINDOW - TILE_SIZE * 2, WINDOW - TILE_SIZE * 2), (-TILE_SIZE, 0))
+        snake1 = init_snake((TILE_SIZE * 2, TILE_SIZE * 2), (TILE_SIZE, 0))  # 왼쪽 위, 오른쪽 방향
+        snake2 = init_snake((WINDOW - TILE_SIZE * 2, WINDOW - TILE_SIZE * 2), (-TILE_SIZE, 0))  # 오른쪽 아래, 왼쪽 방향
         dont1 = {pygame.K_w: 1, pygame.K_s: 1, pygame.K_a: 1, pygame.K_d: 1}
         dont2 = {pygame.K_UP: 1, pygame.K_DOWN: 1, pygame.K_LEFT: 1, pygame.K_RIGHT: 1}
         return snake1, snake2, dont1, dont2
@@ -145,7 +145,8 @@ def runSnakeGame():
         screen.blit(text2, (WINDOW - text2.get_width() - 10, 10))
 
     snake1, snake2, dont1, dont2 = reset_game()
-    food = spawn_food()  # 초기 먹이 생성
+    food = spawn_food()
+    game_over_timer = 0
 
     while True:
         for event in pygame.event.get():
@@ -163,6 +164,45 @@ def runSnakeGame():
             screen.fill('black')
             draw_text_center("Paused", 50, 'white')
             pygame.display.flip()
+            clock.tick(15)
+            continue
+
+        # 게임 종료 시 일시정지 상태 유지
+        if snake1['dead'] or snake2['dead']:
+            if game_over_timer == 0:
+                winner_text = "Draw!"
+                if snake1['dead'] and not snake2['dead']:
+                    winner_text = "Blue Wins!"
+                    score2 += 1
+                elif snake2['dead'] and not snake1['dead']:
+                    winner_text = "Green Wins!"
+                    score1 += 1
+
+                screen.fill('black')
+                draw_text_center(winner_text, 50, 'yellow')
+                draw_scores(score1, score2)
+                pygame.display.flip()
+                game_over_timer = pygame.time.get_ticks()
+
+            # 일정 시간 대기 후 재시작 또는 게임 종료
+            if pygame.time.get_ticks() - game_over_timer >= 2000:
+                if score1 >= WIN_SCORE:
+                    screen.fill('black')
+                    draw_text_center("Green Wins the Game!", 60, 'green')
+                    pygame.display.flip()
+                    pygame.time.wait(3000)
+                    return
+                elif score2 >= WIN_SCORE:
+                    screen.fill('black')
+                    draw_text_center("Blue Wins the Game!", 60, 'blue')
+                    pygame.display.flip()
+                    pygame.time.wait(3000)
+                    return
+
+                snake1, snake2, dont1, dont2 = reset_game()
+                food = spawn_food()
+                game_over_timer = 0
+
             clock.tick(15)
             continue
 
@@ -195,8 +235,6 @@ def runSnakeGame():
             dont2 = {pygame.K_UP: 1, pygame.K_DOWN: 1, pygame.K_LEFT: 0, pygame.K_RIGHT: 1}
 
         screen.fill('black')
-
-        # 먹이 그리기
         pygame.draw.rect(screen, 'red', food)
 
         def move_snake(snake):
@@ -226,7 +264,6 @@ def runSnakeGame():
         move_snake(snake1)
         move_snake(snake2)
 
-        # 먹이 먹었는지 확인
         if snake1['head'].colliderect(food):
             snake1['length'] += 1
             food = spawn_food()
@@ -235,7 +272,6 @@ def runSnakeGame():
             snake2['length'] += 1
             food = spawn_food()
 
-        # 충돌 처리
         if not snake1['dead'] and not snake2['dead']:
             if snake1['head'].center == snake2['head'].center:
                 snake1['dead'] = True
@@ -263,36 +299,12 @@ def runSnakeGame():
         pygame.display.flip()
         clock.tick(15)
 
-        if snake1['dead'] or snake2['dead']:
-            winner_text = "Draw!"
-            if snake1['dead'] and not snake2['dead']:
-                winner_text = "Blue Wins!"
-                score2 += 1
-            elif snake2['dead'] and not snake1['dead']:
-                winner_text = "Green Wins!"
-                score1 += 1
 
-            screen.fill('black')
-            draw_text_center(winner_text, 50, 'yellow')
-            pygame.display.flip()
-            pygame.time.wait(2000)
 
-            if score1 >= WIN_SCORE:
-                screen.fill('black')
-                draw_text_center("Green Wins the Game!", 60, 'green')
-                pygame.display.flip()
-                pygame.time.wait(3000)
-                return
-            elif score2 >= WIN_SCORE:
-                screen.fill('black')
-                draw_text_center("Blue Wins the Game!", 60, 'blue')
-                pygame.display.flip()
-                pygame.time.wait(3000)
-                return
 
-            # 게임 리셋 후 먹이도 다시 생성
-            snake1, snake2, dont1, dont2 = reset_game()
-            food = spawn_food()
+
+
+
 
 
 
